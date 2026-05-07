@@ -1,0 +1,2 @@
+"""Lightweight view-model layer."""
+
