@@ -19,7 +19,7 @@ class TaskListWidget(QListWidget):
         self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setSpacing(10)
+        self.setSpacing(0)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setDragDropMode(QAbstractItemView.DragDropMode.NoDragDrop)
         self.setSizeAdjustPolicy(QAbstractItemView.SizeAdjustPolicy.AdjustToContents)

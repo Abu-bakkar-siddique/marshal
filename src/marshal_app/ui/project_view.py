@@ -24,6 +24,7 @@ class ProjectView(QWidget):
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
+        self.setObjectName("ProjectView")
 
         self.eyebrow = QLabel("Project queue", self)
         self.eyebrow.setObjectName("Eyebrow")
@@ -41,20 +42,37 @@ class ProjectView(QWidget):
         self.subtitle.setVisible(False)
 
         self.add_task_button = QPushButton("new task", self)
+        self.add_task_button.setObjectName("AddTaskButton")
         self.add_task_button.setEnabled(False)
 
         self.jump_to_completed_button = QPushButton("completed", self)
         self.jump_to_completed_button.setObjectName("SecondaryActionButton")
         self.jump_to_completed_button.setEnabled(False)
         self.jump_to_completed_button.clicked.connect(self.scroll_to_completed)
+        self.jump_to_completed_button.setVisible(False)
 
-        header_row = QHBoxLayout()
-        header_row.setSpacing(12)
-        header_row.addWidget(self.title, stretch=1)
-        header_row.addWidget(self.jump_to_completed_button)
-        header_row.addWidget(self.add_task_button)
+        self.fullscreen_button = QPushButton("⛶", self)
+        self.fullscreen_button.setObjectName("IconButton")
+        self.fullscreen_button.setToolTip("Toggle fullscreen")
+        self.fullscreen_button.setFixedSize(24, 24)
 
         self.progress_header = ProgressHeader(self)
+        self.header = QFrame(self)
+        self.header.setObjectName("ProjectHeader")
+        title_row = QHBoxLayout()
+        title_row.setContentsMargins(0, 0, 0, 0)
+        title_row.setSpacing(10)
+        title_row.addWidget(self.title, stretch=1)
+        title_row.addWidget(self.fullscreen_button)
+
+        header_layout = QVBoxLayout(self.header)
+        header_layout.setContentsMargins(22, 18, 22, 14)
+        header_layout.setSpacing(10)
+        header_layout.addLayout(title_row)
+        header_layout.addWidget(self.progress_header)
+        header_layout.addWidget(self.subtitle)
+        header_layout.addWidget(self.jump_to_completed_button)
+
         self.empty_state = EmptyState(
             "No project selected",
             "Create a project from the sidebar to start building an ordered queue.",
@@ -63,6 +81,7 @@ class ProjectView(QWidget):
 
         self.queue_label = QLabel("queue", self)
         self.queue_label.setObjectName("SectionTitle")
+        self.queue_label.setVisible(False)
 
         self.queue_empty_state = EmptyState(
             "No tasks yet",
@@ -84,8 +103,7 @@ class ProjectView(QWidget):
         content = QWidget(self)
         self.content_layout = QVBoxLayout(content)
         self.content_layout.setContentsMargins(0, 0, 0, 0)
-        self.content_layout.setSpacing(14)
-        self.content_layout.addWidget(self.progress_header)
+        self.content_layout.setSpacing(0)
         self.content_layout.addWidget(self.empty_state)
         self.content_layout.addWidget(self.queue_label)
         self.content_layout.addWidget(self.queue_empty_state)
@@ -98,13 +116,20 @@ class ProjectView(QWidget):
         self.scroll_area.setFrameShape(QFrame.Shape.NoFrame)
         self.scroll_area.setWidget(content)
 
+        self.add_row = QFrame(self)
+        self.add_row.setObjectName("AddRow")
+        add_layout = QVBoxLayout(self.add_row)
+        add_layout.setContentsMargins(22, 8, 22, 8)
+        add_layout.setSpacing(0)
+        add_layout.addWidget(self.add_task_button)
+
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(32, 28, 32, 28)
-        layout.setSpacing(18)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         layout.addWidget(self.eyebrow)
-        layout.addLayout(header_row)
-        layout.addWidget(self.subtitle)
+        layout.addWidget(self.header)
         layout.addWidget(self.scroll_area, stretch=1)
+        layout.addWidget(self.add_row)
 
         self.set_project(None, [], None)
 
@@ -128,6 +153,7 @@ class ProjectView(QWidget):
             self.subtitle.setVisible(False)
             self.progress_header.set_progress(0, 0, 0)
             self.add_task_button.setEnabled(False)
+            self.add_row.setVisible(False)
             self.jump_to_completed_button.setEnabled(False)
             self.empty_state.setVisible(True)
             self.queue_label.setVisible(False)
@@ -144,9 +170,10 @@ class ProjectView(QWidget):
         incomplete_tasks = [task for task in tasks if not task.is_done]
         complete_tasks = [task for task in tasks if task.is_done]
         self.add_task_button.setEnabled(not project.is_closed)
+        self.add_row.setVisible(True)
         self.jump_to_completed_button.setEnabled(bool(complete_tasks))
         self.empty_state.setVisible(False)
-        self.queue_label.setVisible(True)
+        self.queue_label.setVisible(False)
         self.completed_panel.setVisible(True)
         queued_cards = self.queue_list.set_tasks(incomplete_tasks, active_task_id)
         self.queue_list.setDragEnabled(len(incomplete_tasks) > 1)

@@ -20,7 +20,8 @@ class MainWindow(QMainWindow):
         self.selected_project_id: int | None = None
 
         self.setWindowTitle("marshal")
-        self.resize(1280, 820)
+        self.resize(720, 580)
+        self.setMinimumSize(680, 520)
         self.setStyleSheet(APP_STYLE_SHEET)
 
         splitter = QSplitter(Qt.Orientation.Horizontal, self)
@@ -39,7 +40,7 @@ class MainWindow(QMainWindow):
         splitter.addWidget(self.content_stack)
         splitter.setStretchFactor(0, 0)
         splitter.setStretchFactor(1, 1)
-        splitter.setSizes([280, 1000])
+        splitter.setSizes([176, 544])
 
         self.setCentralWidget(splitter)
         self.focus_queue_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
@@ -54,7 +55,11 @@ class MainWindow(QMainWindow):
         self.sidebar.standalone_button.clicked.connect(self._show_standalone_view)
         self.sidebar.project_list.itemSelectionChanged.connect(self._handle_project_selection)
         self.project_view.add_task_button.clicked.connect(self._create_task)
+        self.project_view.fullscreen_button.clicked.connect(self._toggle_fullscreen)
         self.project_view.queue_reordered.connect(self._reorder_project_tasks)
+        self.standalone_view.add_task_button.clicked.connect(self._create_standalone_task)
+        self.standalone_view.fullscreen_button.clicked.connect(self._toggle_fullscreen)
+        self.standalone_view.queue_reordered.connect(self._reorder_standalone_tasks)
 
     def _refresh_projects(self) -> None:
         projects = self.services.project_service.list_projects()
@@ -69,6 +74,14 @@ class MainWindow(QMainWindow):
 
         self.sidebar.set_projects(projects, self.selected_project_id)
         self._refresh_active_view()
+
+    def _refresh_standalone_view(self) -> None:
+        tasks = self.services.task_service.list_standalone_tasks()
+        cards = self.standalone_view.set_tasks(tasks)
+        for card in cards:
+            card.toggled.connect(self._set_task_done_state)
+            card.delete_requested.connect(self._delete_task)
+        self.content_stack.setCurrentWidget(self.standalone_view)
 
     def _refresh_active_view(self) -> None:
         if self.selected_project_id is None:
@@ -128,20 +141,32 @@ class MainWindow(QMainWindow):
             )
             self._refresh_active_view()
 
+    def _create_standalone_task(self) -> None:
+        dialog = TaskDialog(self)
+        dialog.setWindowTitle("New standalone task")
+        if dialog.exec() == TaskDialog.DialogCode.Accepted:
+            self.services.task_service.create_standalone_task(
+                dialog.title,
+                dialog.comments,
+            )
+            self._refresh_standalone_view()
+
     def _set_task_done_state(self, task_id: int, is_done: bool) -> None:
         self.services.task_service.set_done_state(task_id, is_done)
-        self._refresh_active_view()
+        self._refresh_current_task_view()
 
     def _delete_task(self, task_id: int) -> None:
         reply = QMessageBox.question(
             self,
             "Delete task",
-            "Delete this task from the project?",
+            "Delete this standalone task?"
+            if self.content_stack.currentWidget() is self.standalone_view
+            else "Delete this task from the project?",
         )
         if reply != QMessageBox.StandardButton.Yes:
             return
         self.services.task_service.delete_task(task_id)
-        self._refresh_active_view()
+        self._refresh_current_task_view()
 
     def _reorder_project_tasks(self, ordered_task_ids: list[int]) -> None:
         if self.selected_project_id is None:
@@ -152,17 +177,40 @@ class MainWindow(QMainWindow):
         )
         self._refresh_active_view()
 
+    def _reorder_standalone_tasks(self, ordered_task_ids: list[int]) -> None:
+        self.services.task_service.reorder_standalone_tasks(ordered_task_ids)
+        self._refresh_standalone_view()
+
     def _show_standalone_view(self) -> None:
+        self.sidebar.project_list.blockSignals(True)
         self.sidebar.project_list.clearSelection()
+        self.sidebar.project_list.setCurrentRow(-1)
+        self.sidebar.project_list.blockSignals(False)
         self.selected_project_id = None
-        self.content_stack.setCurrentWidget(self.standalone_view)
+        self._refresh_standalone_view()
+
+    def _refresh_current_task_view(self) -> None:
+        if self.content_stack.currentWidget() is self.standalone_view:
+            self._refresh_standalone_view()
+            return
+        self._refresh_active_view()
 
     def _focus_project_queue(self) -> None:
-        if self.content_stack.currentWidget() is not self.project_view:
+        if self.content_stack.currentWidget() is self.project_view:
+            self.project_view.focus_queue()
             return
-        self.project_view.focus_queue()
+        if self.content_stack.currentWidget() is self.standalone_view:
+            self.standalone_view.focus_queue()
 
     def _toggle_queue_move_mode(self) -> None:
-        if self.content_stack.currentWidget() is not self.project_view:
+        if self.content_stack.currentWidget() is self.project_view:
+            self.project_view.toggle_queue_move_mode()
             return
-        self.project_view.toggle_queue_move_mode()
+        if self.content_stack.currentWidget() is self.standalone_view:
+            self.standalone_view.toggle_queue_move_mode()
+
+    def _toggle_fullscreen(self) -> None:
+        if self.isFullScreen():
+            self.showNormal()
+            return
+        self.showFullScreen()

@@ -1,238 +1,368 @@
 from __future__ import annotations
 
-from marshal_app.ui.theme.palette import (
-    ACCENT,
-    BG,
-    BORDER,
-    DANGER,
-    MUTED,
-    SURFACE,
-    TEXT,
-)
 
+APP_STYLE_SHEET = """
+QMainWindow {
+    background: #252525;
+}
 
-APP_STYLE_SHEET = f"""
-QMainWindow {{
-    background: {BG};
-}}
-
-QWidget {{
-    background: {BG};
-    color: {TEXT};
+QWidget {
+    background: #1c1c1c;
+    color: #e8e8e8;
     font-family: "DejaVu Sans";
+    font-size: 13px;
+}
+
+QSplitter::handle {
+    background: rgba(255, 255, 255, 0.08);
+    width: 1px;
+}
+
+QWidget#Sidebar {
+    background: #252525;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+QWidget#ProjectView {
+    background: #1c1c1c;
+}
+
+QLabel#SidebarTitle {
+    background: #252525;
+    color: #606060;
     font-size: 12px;
-}}
+    font-weight: 500;
+    letter-spacing: 1px;
+    padding: 0 14px 14px 14px;
+}
 
-QLabel#SidebarTitle,
-QLabel#ProjectTitle {{
-    font-size: 18px;
-    font-weight: 600;
-}}
+QLabel#SidebarSectionLabel {
+    background: #252525;
+    color: #606060;
+    font-size: 10px;
+    text-transform: uppercase;
+    padding: 0 14px 6px 14px;
+}
 
-QLabel#SidebarSubtitle,
-QLabel#ProjectSubtitle,
-QLabel#EmptyStateMessage {{
-    color: {MUTED};
-}}
+QListWidget#ProjectList {
+    background: #252525;
+    border: none;
+    outline: none;
+    padding: 0;
+}
+
+QListWidget#ProjectList::item {
+    color: #a0a0a0;
+    padding: 7px 14px 7px 12px;
+    border-left: 2px solid transparent;
+}
+
+QListWidget#ProjectList::item:hover {
+    color: #e8e8e8;
+}
+
+QListWidget#ProjectList::item:selected,
+QListWidget#ProjectList::item:selected:active,
+QListWidget#ProjectList::item:selected:!active {
+    background: #1c1c1c;
+    color: #e8e8e8;
+    border-left: 2px solid #e8e8e8;
+}
+
+QFrame#ProjectHeader {
+    background: #1c1c1c;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+QLabel#ProjectTitle {
+    color: #e8e8e8;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+QLabel#ProjectSubtitle {
+    color: #a0a0a0;
+    font-size: 12px;
+}
+
+QFrame#ProgressHeader {
+    background: #1c1c1c;
+    border: none;
+}
+
+QProgressBar {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 1px;
+    min-height: 2px;
+    max-height: 2px;
+}
+
+QProgressBar::chunk {
+    background: #e8e8e8;
+    border-radius: 1px;
+}
+
+QLabel#ProgressPercentage {
+    color: #606060;
+    font-size: 11px;
+    font-weight: 400;
+}
 
 QLabel#Eyebrow,
-QLabel#SectionTitle {{
-    color: {MUTED};
-    font-size: 11px;
+QLabel#SectionTitle {
+    color: #606060;
+    font-size: 10px;
     font-weight: 500;
-}}
+}
 
-QLabel#ProgressPercentage {{
-    color: {MUTED};
-    font-size: 11px;
-    font-weight: 600;
-}}
+QLabel#SectionTitle {
+    padding: 10px 22px 4px 22px;
+}
 
-QFrame#TaskCard,
-QListWidget#ProjectList,
-QListWidget#TaskListWidget {{
-    background: {SURFACE};
-    border: 1px solid {BORDER};
-    border-radius: 0px;
-}}
-
-QFrame#ProgressHeader {{
-    background: transparent;
-    border: none;
-}}
-
-QPushButton {{
+QPushButton,
+QPushButton#SidebarActionButton,
+QPushButton#SecondaryActionButton {
     background: transparent;
     border: none;
     border-radius: 0px;
-    padding: 2px 0px;
-    color: {TEXT};
+    color: #606060;
     text-align: left;
-}}
+}
 
-QPushButton:hover {{
-    color: {ACCENT};
-}}
+QPushButton:hover {
+    color: #e8e8e8;
+}
 
-QPushButton#CardActionButton,
-QPushButton#SecondaryActionButton {{
-    padding: 2px 0px;
-}}
+QPushButton#IconButton {
+    color: #606060;
+    border: none;
+    border-radius: 4px;
+    padding: 0;
+    text-align: center;
+    font-size: 14px;
+}
 
-QPushButton#CardActionButton {{
-    color: {MUTED};
-}}
+QPushButton#IconButton:hover {
+    color: #e8e8e8;
+    background: #252525;
+}
 
-QPushButton#CardActionButton:hover {{
-    color: {TEXT};
-}}
+QPushButton#SidebarActionButton {
+    background: #252525;
+    padding: 6px 14px;
+    font-size: 12px;
+}
 
-QListWidget#ProjectList {{
+QFrame#AddRow {
+    background: #1c1c1c;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+QPushButton#AddTaskButton {
     background: transparent;
     border: none;
-    outline: none;
-}}
+    color: #606060;
+    font-size: 13px;
+    padding-left: 24px;
+}
 
-QListWidget#ProjectList::item {{
-    padding: 3px 0;
-}}
-
-QListWidget#ProjectList::item:selected {{
-    background: transparent;
-    color: {ACCENT};
-}}
-
-QListWidget#TaskListWidget {{
+QListWidget#TaskListWidget {
     outline: none;
     background: transparent;
     border: none;
-}}
+}
 
-QListWidget#TaskListWidget::item {{
+QListWidget#TaskListWidget::item {
     margin: 0;
     background: transparent;
-}}
+}
 
 QListWidget#TaskListWidget::item:selected,
 QListWidget#TaskListWidget::item:focus,
-QListWidget#TaskListWidget::item:selected:active {{
+QListWidget#TaskListWidget::item:selected:active {
     background: transparent;
     border: none;
-}}
+}
+
+QFrame#TaskCard {
+    background: #1c1c1c;
+    border: none;
+    border-bottom: 1px solid transparent;
+}
+
+QFrame#TaskCard:hover,
+QFrame#TaskCard[expanded="true"],
+QFrame#TaskCard[keyboardSelected="true"] {
+    background: #252525;
+}
+
+QFrame#TaskCard[expanded="true"] {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+QFrame#TaskCard[moveMode="true"] {
+    background: #303030;
+}
+
+QCheckBox#TaskCheck {
+    spacing: 0;
+    min-width: 14px;
+    max-width: 14px;
+    min-height: 14px;
+    max-height: 14px;
+}
+
+QCheckBox#TaskCheck::indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: transparent;
+}
+
+QCheckBox#TaskCheck::indicator:checked {
+    background: #e8e8e8;
+    border: 1px solid #e8e8e8;
+    image: none;
+}
+
+QLabel#TaskTitle {
+    color: #e8e8e8;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+QFrame#TaskCard[done="true"] QLabel#TaskTitle {
+    color: #606060;
+    text-decoration: line-through;
+}
+
+QLabel#TaskDetail {
+    color: #a0a0a0;
+    font-size: 12px;
+    line-height: 160%;
+    padding: 4px 0 2px 24px;
+}
+
+QLabel#ActiveDot {
+    background: #e8e8e8;
+    border-radius: 2px;
+    min-width: 5px;
+    max-width: 5px;
+    min-height: 5px;
+    max-height: 5px;
+}
+
+QLabel#ExpandButton {
+    color: transparent;
+    font-size: 12px;
+}
+
+QFrame#TaskCard:hover QLabel#ExpandButton,
+QFrame#TaskCard[expanded="true"] QLabel#ExpandButton,
+QFrame#TaskCard[keyboardSelected="true"] QLabel#ExpandButton {
+    color: #606060;
+}
+
+QPushButton#CardActionButton {
+    color: transparent;
+    font-size: 11px;
+    padding: 0;
+}
+
+QFrame#TaskCard:hover QPushButton#CardActionButton {
+    color: #606060;
+}
+
+QFrame#TaskCard QPushButton#CardActionButton:hover {
+    color: #e8e8e8;
+}
+
+QFrame#SectionLine {
+    color: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.08);
+    max-height: 1px;
+}
+
+QLabel#SectionDividerTitle {
+    color: #606060;
+    font-size: 10px;
+    font-weight: 400;
+    text-transform: uppercase;
+}
 
 QScrollArea,
-QAbstractScrollArea {{
+QAbstractScrollArea {
     background: transparent;
     border: none;
-}}
+}
 
-QScrollBar:vertical {{
+QScrollBar:vertical {
     background: transparent;
     border: none;
-    width: 10px;
+    width: 4px;
     margin: 0;
-}}
+}
 
-QScrollBar::handle:vertical {{
-    background: rgba(255, 255, 255, 0.12);
+QScrollBar::handle:vertical {
+    background: rgba(255, 255, 255, 0.08);
     border: none;
-    border-radius: 5px;
+    border-radius: 2px;
     min-height: 28px;
-}}
+}
 
-QScrollBar::handle:vertical:hover {{
-    background: rgba(255, 255, 255, 0.18);
-}}
+QScrollBar::handle:vertical:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
 
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical,
 QScrollBar::add-page:vertical,
-QScrollBar::sub-page:vertical {{
+QScrollBar::sub-page:vertical {
     background: transparent;
     border: none;
     height: 0;
-}}
+}
 
-QScrollBar:horizontal {{
+QScrollBar:horizontal {
     background: transparent;
     border: none;
-    height: 10px;
+    height: 4px;
     margin: 0;
-}}
+}
 
-QScrollBar::handle:horizontal {{
-    background: rgba(255, 255, 255, 0.12);
+QScrollBar::handle:horizontal {
+    background: rgba(255, 255, 255, 0.08);
     border: none;
-    border-radius: 5px;
+    border-radius: 2px;
     min-width: 28px;
-}}
+}
 
-QScrollBar::handle:horizontal:hover {{
-    background: rgba(255, 255, 255, 0.18);
-}}
+QScrollBar::handle:horizontal:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
 
 QScrollBar::add-line:horizontal,
 QScrollBar::sub-line:horizontal,
 QScrollBar::add-page:horizontal,
-QScrollBar::sub-page:horizontal {{
+QScrollBar::sub-page:horizontal {
     background: transparent;
     border: none;
     width: 0;
-}}
+}
 
-QProgressBar {{
-    background: rgba(255, 255, 255, 0.08);
-    border: none;
-    border-radius: 0px;
-    min-height: 3px;
-    max-height: 3px;
-}}
+QLineEdit,
+QTextEdit,
+QPlainTextEdit {
+    background: #252525;
+    color: #e8e8e8;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    selection-background-color: #303030;
+}
 
-QProgressBar::chunk {{
-    background: {ACCENT};
-    border-radius: 0px;
-}}
-
-QFrame#TaskCard[active="true"] {{
-    border: 1px solid rgba(249, 112, 112, 0.25);
-    background: rgba(249, 112, 112, 0.04);
-}}
-
-QFrame#TaskCard[keyboardSelected="true"] {{
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    background: rgba(255, 255, 255, 0.02);
-}}
-
-QFrame#TaskCard[moveMode="true"] {{
-    border: 1px dashed rgba(255, 255, 255, 0.16);
-    background: rgba(255, 255, 255, 0.03);
-}}
-
-QFrame#TaskCard[done="true"] QLabel#TaskTitle,
-QFrame#TaskCard[done="true"] QLabel#TaskDetail,
-QFrame#TaskCard[done="true"] QLabel#TaskState {{
-    color: {MUTED};
-}}
-
-QLabel#TaskTitle {{
-    font-size: 13px;
-    font-weight: 500;
-}}
-
-QLabel#TaskState {{
-    padding: 0px;
-    font-size: 10px;
-    font-weight: 600;
-}}
-
-QLabel#TaskState[stateKind="active"] {{
-    background: transparent;
-    color: {DANGER};
-    border: none;
-}}
-
-QLabel#TaskDetail,
-QLabel#EmptyStateTitle {{
-    color: {MUTED};
-}}
+QLabel#EmptyStateTitle,
+QLabel#EmptyStateMessage {
+    color: #606060;
+}
 """
