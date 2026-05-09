@@ -48,6 +48,10 @@ TASK_ROWS = [
     (15, 3, None, "Compile target company list", "A flat queue is enough here.", 0, 200, None),
     (16, 3, None, "Prepare outreach template", "Could move higher if you want to test priority shifts.", 0, 300, None),
     (17, 3, None, "Send first 5 applications", "Done task to verify completion state in a shorter project.", 1, 400, "2026-05-02 18:20:00"),
+
+    (18, None, None, "Pay electricity bill", "Standalone because it is not part of any project queue.", 0, 100, None),
+    (19, None, None, "Call mechanic", "Quick personal follow-up with no project context.", 0, 200, None),
+    (20, None, None, "Back up laptop", "Already handled; useful for checking standalone completed state.", 1, 300, "2026-05-04 15:45:00"),
 ]
 
 CHECKPOINT_ROWS = [
