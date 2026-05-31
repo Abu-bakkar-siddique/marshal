@@ -15,6 +15,7 @@ dependencies = [
 [project.scripts]
 marshal = "marshal_app.main:main"
 marshal-seed-demo = "marshal_app.dev.seed_demo:main"
+marshal-test-log = "marshal_app.dev.test_report:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

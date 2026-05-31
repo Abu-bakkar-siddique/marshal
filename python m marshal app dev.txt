@@ -1,0 +1,2 @@
+python -m marshal_app.dev.test_report
+run marshal test suite
