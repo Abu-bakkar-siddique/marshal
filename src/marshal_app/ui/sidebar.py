@@ -20,6 +20,8 @@ class Sidebar(QWidget):
         self.project_list = QListWidget(self)
         self.project_list.setObjectName("ProjectList")
 
+        self.planner_button = QPushButton("plan", self)
+        self.planner_button.setObjectName("SidebarActionButton")
         self.add_project_button = QPushButton("new project", self)
         self.add_project_button.setObjectName("SidebarActionButton")
         self.standalone_button = QPushButton("standalone", self)
@@ -31,6 +33,7 @@ class Sidebar(QWidget):
         layout.addWidget(title)
         layout.addWidget(project_label)
         layout.addWidget(self.project_list, stretch=1)
+        layout.addWidget(self.planner_button)
         layout.addWidget(self.standalone_button)
         layout.addWidget(self.add_project_button)
 

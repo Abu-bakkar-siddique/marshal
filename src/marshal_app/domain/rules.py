@@ -9,10 +9,8 @@ def derive_active_task(tasks: list[Task]) -> Task | None:
         return None
     return min(incomplete, key=lambda task: task.sort_order)
 
-
 def can_close_project(tasks: list[Task]) -> bool:
     return bool(tasks) and all(task.is_done for task in tasks)
-
 
 def project_progress(tasks: list[Task]) -> tuple[int, int, int]:
     total = len(tasks)

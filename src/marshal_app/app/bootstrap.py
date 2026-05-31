@@ -8,6 +8,7 @@ from marshal_app.app.settings import DEFAULT_SETTINGS
 from marshal_app.services.checkpoint_service import CheckpointService
 from marshal_app.services.container import ServiceContainer
 from marshal_app.services.progress_service import ProgressService
+from marshal_app.services.planning_service import PlanningService
 from marshal_app.services.project_service import ProjectService
 from marshal_app.services.section_service import SectionService
 from marshal_app.services.task_service import TaskService
@@ -33,6 +34,7 @@ def run() -> int:
         section_service=SectionService(SectionRepository(connection)),
         checkpoint_service=CheckpointService(CheckpointRepository(connection)),
         progress_service=ProgressService(),
+        planning_service=PlanningService(),
     )
 
     window = MainWindow(services)

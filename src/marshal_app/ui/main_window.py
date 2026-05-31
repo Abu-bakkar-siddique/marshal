@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QMainWindow, QMessageBox, QSplitter, QStackedWidge
 from marshal_app.services import ServiceContainer
 from marshal_app.ui.dialogs.project_dialog import ProjectDialog
 from marshal_app.ui.dialogs.task_dialog import TaskDialog
+from marshal_app.ui.planning_view import PlanningView
 from marshal_app.ui.project_view import ProjectView
 from marshal_app.ui.sidebar import Sidebar
 from marshal_app.ui.standalone_view import StandaloneView
@@ -32,9 +33,11 @@ class MainWindow(QMainWindow):
         self.content_stack = QStackedWidget(self)
         self.project_view = ProjectView(self)
         self.standalone_view = StandaloneView(self)
+        self.planning_view = PlanningView(self.services.planning_service, self)
 
         self.content_stack.addWidget(self.project_view)
         self.content_stack.addWidget(self.standalone_view)
+        self.content_stack.addWidget(self.planning_view)
 
         splitter.addWidget(self.sidebar)
         splitter.addWidget(self.content_stack)
@@ -52,6 +55,7 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self) -> None:
         self.sidebar.add_project_button.clicked.connect(self._create_project)
+        self.sidebar.planner_button.clicked.connect(self._show_planning_view)
         self.sidebar.standalone_button.clicked.connect(self._show_standalone_view)
         self.sidebar.project_list.itemSelectionChanged.connect(self._handle_project_selection)
         self.project_view.add_task_button.clicked.connect(self._create_task)
@@ -188,6 +192,15 @@ class MainWindow(QMainWindow):
         self.sidebar.project_list.blockSignals(False)
         self.selected_project_id = None
         self._refresh_standalone_view()
+
+    def _show_planning_view(self) -> None:
+        self.sidebar.project_list.blockSignals(True)
+        self.sidebar.project_list.clearSelection()
+        self.sidebar.project_list.setCurrentRow(-1)
+        self.sidebar.project_list.blockSignals(False)
+        self.selected_project_id = None
+        self.content_stack.setCurrentWidget(self.planning_view)
+        self.planning_view.focus_input()
 
     def _refresh_current_task_view(self) -> None:
         if self.content_stack.currentWidget() is self.standalone_view:

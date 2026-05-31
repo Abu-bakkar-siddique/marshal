@@ -27,6 +27,10 @@ QWidget#ProjectView {
     background: #1c1c1c;
 }
 
+QWidget#PlanningView {
+    background: #1c1c1c;
+}
+
 QLabel#SidebarTitle {
     background: #252525;
     color: #606060;
@@ -152,6 +156,18 @@ QPushButton#SidebarActionButton {
     background: #252525;
     padding: 6px 14px;
     font-size: 12px;
+}
+
+QPushButton#PrimaryActionButton {
+    background: #e8e8e8;
+    color: #1c1c1c;
+    padding: 6px 12px;
+    border: 1px solid #e8e8e8;
+}
+
+QPushButton#PrimaryActionButton:hover {
+    background: #ffffff;
+    border-color: #ffffff;
 }
 
 QFrame#AddRow {
@@ -364,5 +380,45 @@ QPlainTextEdit {
 QLabel#EmptyStateTitle,
 QLabel#EmptyStateMessage {
     color: #606060;
+}
+
+QFrame#PlanningHeader {
+    background: #1c1c1c;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+QLabel#PlanningTitle {
+    color: #e8e8e8;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+QLabel#PlanningSubtitle,
+QLabel#PlanningStatus,
+QLabel#PlanningQuestion {
+    color: #a0a0a0;
+    font-size: 12px;
+}
+
+QLabel#PlanningQuestion {
+    color: #e8e8e8;
+}
+
+QLabel#PlanningSectionTitle {
+    color: #606060;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+QPlainTextEdit#PlanningInput,
+QPlainTextEdit#PlanningFeedback,
+QPlainTextEdit#PlanningConversation,
+QPlainTextEdit#PlanningDraft,
+QPlainTextEdit#PlanningStructured {
+    background: #252525;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e8e8e8;
+    padding: 8px;
 }
 """
