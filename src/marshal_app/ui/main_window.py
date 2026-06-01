@@ -58,6 +58,7 @@ class MainWindow(QMainWindow):
         self.sidebar.planner_button.clicked.connect(self._show_planning_view)
         self.sidebar.standalone_button.clicked.connect(self._show_standalone_view)
         self.sidebar.project_list.itemSelectionChanged.connect(self._handle_project_selection)
+        self.planning_view.accepted.connect(self._accept_planning_session)
         self.project_view.add_task_button.clicked.connect(self._create_task)
         self.project_view.fullscreen_button.clicked.connect(self._toggle_fullscreen)
         self.project_view.queue_reordered.connect(self._reorder_project_tasks)
@@ -201,6 +202,15 @@ class MainWindow(QMainWindow):
         self.selected_project_id = None
         self.content_stack.setCurrentWidget(self.planning_view)
         self.planning_view.focus_input()
+
+    def _accept_planning_session(self, session) -> None:
+        project = self.services.planning_service.materialize_session(
+            session,
+            self.services.project_service,
+            self.services.task_service,
+        )
+        self.selected_project_id = project.id
+        self._refresh_projects()
 
     def _refresh_current_task_view(self) -> None:
         if self.content_stack.currentWidget() is self.standalone_view:
