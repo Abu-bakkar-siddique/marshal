@@ -37,3 +37,12 @@ Implement the first vertical slice:
 - ordered task list
 - active task derivation
 - add/edit/delete/reorder task flow
+
+## AI planner
+
+The planner screen now supports a Gemini-backed draft flow when an API key is available from Google AI Studio.
+
+- set `GEMINI_API_KEY` or `GOOGLE_API_KEY`
+- optional model override: `MARSHAL_GEMINI_MODEL`
+- default model: `gemini-2.5-flash`
+- if no key is set, the planner falls back to the local draft engine

@@ -18,6 +18,7 @@ from marshal_app.storage.repositories.task_repository import TaskRepository
 
 class DomainRulesTests(unittest.TestCase):
     def test_derive_active_task_picks_first_incomplete_by_sort_order(self) -> None:
+        """Check that the first unfinished task becomes the active one."""
         tasks = [
             Task(id=1, title="Done first", is_done=True, sort_order=100),
             Task(id=2, title="Later task", is_done=False, sort_order=300),
@@ -31,6 +32,7 @@ class DomainRulesTests(unittest.TestCase):
         self.assertEqual(active.title, "Earliest active")
 
     def test_project_progress_and_close_rules_handle_empty_and_completed_lists(self) -> None:
+        """Check that progress and closing rules work for empty and finished lists."""
         self.assertEqual(project_progress([]), (0, 0, 0))
         self.assertFalse(can_close_project([]))
 
@@ -46,6 +48,7 @@ class DomainRulesTests(unittest.TestCase):
 
 class RepositoryAndServiceTests(unittest.TestCase):
     def setUp(self) -> None:
+        """Create a fresh temporary database for each test."""
         self._tempdir = tempfile.TemporaryDirectory()
         self.db_path = Path(self._tempdir.name) / "marshal.db"
         initialize_database(self.db_path)
@@ -56,10 +59,12 @@ class RepositoryAndServiceTests(unittest.TestCase):
         self.task_service = TaskService(self.task_repository)
 
     def tearDown(self) -> None:
+        """Close the database and remove the temporary files."""
         self.connection.close()
         self._tempdir.cleanup()
 
     def test_project_and_task_services_round_trip_through_sqlite(self) -> None:
+        """Check that projects and tasks can be created, updated, and read back."""
         project = self.project_service.create_project("Release v1", "Ship the first public build")
         self.assertIsInstance(project, Project)
         self.assertIsNotNone(project.id)

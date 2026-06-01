@@ -26,6 +26,7 @@ from marshal_app.storage.repositories.task_repository import TaskRepository
 
 class DatabaseFixture(unittest.TestCase):
     def setUp(self) -> None:
+        """Create one temporary database and the services that use it."""
         self._tempdir = tempfile.TemporaryDirectory()
         self.db_path = Path(self._tempdir.name) / "marshal.db"
         initialize_database(self.db_path)
@@ -54,6 +55,7 @@ class DatabaseFixture(unittest.TestCase):
         )
 
     def insert_project(self, title: str, description: str = "", sort_order: int = 100) -> int:
+        """Insert a project row directly into SQLite for test setup."""
         cursor = self.connection.execute(
             """
             INSERT INTO projects (title, description, sort_order)
@@ -65,6 +67,7 @@ class DatabaseFixture(unittest.TestCase):
         return int(cursor.lastrowid)
 
     def insert_section(self, project_id: int, title: str, description: str = "") -> int:
+        """Insert a section row directly into SQLite for test setup."""
         cursor = self.connection.execute(
             """
             INSERT INTO sections (project_id, title, description)
@@ -86,6 +89,7 @@ class DatabaseFixture(unittest.TestCase):
         section_id: int | None = None,
         completed_at: str | None = None,
     ) -> int:
+        """Insert a task row directly into SQLite for test setup."""
         cursor = self.connection.execute(
             """
             INSERT INTO tasks (
@@ -99,6 +103,7 @@ class DatabaseFixture(unittest.TestCase):
         return int(cursor.lastrowid)
 
     def insert_checkpoint(self, task_id: int, body: str, created_at: str) -> int:
+        """Insert a checkpoint row directly into SQLite for test setup."""
         cursor = self.connection.execute(
             """
             INSERT INTO task_checkpoints (task_id, body, created_at)
@@ -112,6 +117,7 @@ class DatabaseFixture(unittest.TestCase):
 
 class SchemaAndIntegrityTests(unittest.TestCase):
     def test_initialize_database_creates_expected_tables_and_indexes(self) -> None:
+        """Check that the app creates the tables and indexes it depends on."""
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = Path(tmpdir) / "marshal.db"
             initialize_database(db_path)
@@ -145,6 +151,7 @@ class SchemaAndIntegrityTests(unittest.TestCase):
         self.assertIn("idx_checkpoints_task_created", indexes)
 
     def test_section_insert_requires_existing_project(self) -> None:
+        """Check that SQLite rejects a section that points to no project."""
         with tempfile.TemporaryDirectory() as tmpdir:
             db_path = Path(tmpdir) / "marshal.db"
             initialize_database(db_path)
@@ -163,6 +170,7 @@ class SchemaAndIntegrityTests(unittest.TestCase):
 
 class RepositoryBehaviorTests(DatabaseFixture):
     def test_project_repository_assigns_progressive_sort_order(self) -> None:
+        """Check that new projects are numbered in the order they are created."""
         first = self.project_repository.create("Alpha", "first")
         second = self.project_repository.create("Beta", "second")
 
@@ -170,6 +178,7 @@ class RepositoryBehaviorTests(DatabaseFixture):
         self.assertEqual(second.sort_order, 200)
 
     def test_project_service_lists_projects_in_sort_order(self) -> None:
+        """Check that the project list comes back in the expected order."""
         gamma = self.project_repository.create("Gamma")
         alpha = self.project_repository.create("Alpha")
 
@@ -177,6 +186,7 @@ class RepositoryBehaviorTests(DatabaseFixture):
         self.assertEqual([project.title for project in listed], [gamma.title, alpha.title])
 
     def test_task_repository_creates_project_and_standalone_tasks(self) -> None:
+        """Check that tasks can belong to a project or stand alone."""
         project_id = self.insert_project("Queue")
 
         project_task = self.task_repository.create_for_project(project_id, "Ship feature", "project work")
@@ -188,6 +198,7 @@ class RepositoryBehaviorTests(DatabaseFixture):
         self.assertEqual(standalone_task.sort_order, 100)
 
     def test_task_repository_orders_incomplete_tasks_before_completed_tasks(self) -> None:
+        """Check that unfinished tasks stay ahead of finished ones."""
         project_id = self.insert_project("Queue")
         done_id = self.insert_task(project_id=project_id, title="Completed", is_done=1, sort_order=300)
         later_id = self.insert_task(project_id=project_id, title="Later", is_done=0, sort_order=200)
@@ -198,6 +209,7 @@ class RepositoryBehaviorTests(DatabaseFixture):
         self.assertEqual(derive_active_task(ordered).id, early_id)
 
     def test_task_repository_done_state_round_trips_completed_timestamp(self) -> None:
+        """Check that marking a task done stores and clears its finish time."""
         task_id = self.insert_task(project_id=None, title="Standalone", sort_order=100)
 
         self.task_repository.update_done_state(task_id, True)
@@ -213,6 +225,7 @@ class RepositoryBehaviorTests(DatabaseFixture):
         self.assertIsNone(reopened.completed_at)
 
     def test_task_repository_reorder_skips_completed_tasks(self) -> None:
+        """Check that completed tasks are left at the end during reordering."""
         project_id = self.insert_project("Queue")
         first_id = self.insert_task(project_id=project_id, title="First", sort_order=100)
         second_id = self.insert_task(project_id=project_id, title="Second", sort_order=200)
@@ -226,6 +239,7 @@ class RepositoryBehaviorTests(DatabaseFixture):
         self.assertEqual(ordered[-1].sort_order, 300)
 
     def test_section_repository_lists_sections_for_project(self) -> None:
+        """Check that the app returns the sections belonging to one project."""
         project_id = self.insert_project("Publication")
         section_a = self.insert_section(project_id, "Drafting")
         section_b = self.insert_section(project_id, "Review")
@@ -234,6 +248,7 @@ class RepositoryBehaviorTests(DatabaseFixture):
         self.assertEqual([section.id for section in sections], [section_a, section_b])
 
     def test_checkpoint_repository_returns_latest_checkpoint(self) -> None:
+        """Check that the newest checkpoint is the one returned."""
         task_id = self.insert_task(project_id=None, title="Standalone", sort_order=100)
         first = self.insert_checkpoint(task_id, "First checkpoint", "2026-05-01 10:00:00")
         second = self.insert_checkpoint(task_id, "Second checkpoint", "2026-05-01 12:00:00")
@@ -248,6 +263,7 @@ class RepositoryBehaviorTests(DatabaseFixture):
 
 class ServiceAndPlanningTests(DatabaseFixture):
     def test_service_container_exposes_expected_services(self) -> None:
+        """Check that the service container stores the services we built."""
         self.assertIs(self.services.project_service, self.project_service)
         self.assertIs(self.services.task_service, self.task_service)
         self.assertIs(self.services.section_service, self.section_service)
@@ -256,6 +272,7 @@ class ServiceAndPlanningTests(DatabaseFixture):
         self.assertIs(self.services.planning_service, self.planning_service)
 
     def test_section_service_delegates_to_repository(self) -> None:
+        """Check that the section service reads back the same section row."""
         project_id = self.insert_project("Research")
         section_id = self.insert_section(project_id, "Reading list")
 
@@ -264,6 +281,7 @@ class ServiceAndPlanningTests(DatabaseFixture):
         self.assertEqual(sections[0].id, section_id)
 
     def test_checkpoint_service_returns_latest_checkpoint(self) -> None:
+        """Check that the checkpoint service returns the latest saved note."""
         task_id = self.insert_task(project_id=None, title="Standalone", sort_order=100)
         self.insert_checkpoint(task_id, "Draft checkpoint", "2026-05-01 09:00:00")
         self.insert_checkpoint(task_id, "Final checkpoint", "2026-05-01 10:00:00")
@@ -273,6 +291,7 @@ class ServiceAndPlanningTests(DatabaseFixture):
         self.assertEqual(checkpoint.body, "Final checkpoint")
 
     def test_progress_service_matches_domain_progress_rules(self) -> None:
+        """Check that the progress service agrees with the domain logic."""
         tasks = [
             Task(id=1, title="One", is_done=True),
             Task(id=2, title="Two", is_done=False),
@@ -285,6 +304,7 @@ class ServiceAndPlanningTests(DatabaseFixture):
         self.assertFalse(can_close_project(tasks))
 
     def test_task_service_active_task_tracks_first_open_item(self) -> None:
+        """Check that the task service picks the first unfinished task."""
         project_id = self.insert_project("Release")
         first_id = self.insert_task(project_id=project_id, title="Draft", sort_order=100)
         second_id = self.insert_task(project_id=project_id, title="Ship", sort_order=200)
@@ -298,9 +318,11 @@ class ServiceAndPlanningTests(DatabaseFixture):
 
 class PlanningWorkflowTests(unittest.TestCase):
     def setUp(self) -> None:
+        """Create a planner service for the workflow tests."""
         self.service = PlanningService(RuleBasedPlanningEngine())
 
     def test_empty_input_uses_fallback_tasks_and_default_question(self) -> None:
+        """Check that blank input still produces a simple fallback plan."""
         session = self.service.create_session("")
 
         self.assertEqual(session.phase.name, "DRAFT")
@@ -311,6 +333,7 @@ class PlanningWorkflowTests(unittest.TestCase):
         self.assertIn("Fallback draft", [task.rationale for task in session.tentative_tasks])
 
     def test_short_input_prompts_for_clarification(self) -> None:
+        """Check that vague input asks the user to be more specific."""
         session = self.service.create_session("Launch the site")
 
         self.assertEqual(session.phase.name, "DRAFT")
@@ -319,6 +342,7 @@ class PlanningWorkflowTests(unittest.TestCase):
         self.assertIn("Tentative tasks:", self.service.render_tentative_draft_text(session))
 
     def test_bullets_become_distinct_tasks(self) -> None:
+        """Check that a list in the prompt turns into separate tasks."""
         session = self.service.create_session("Draft homepage copy; wire checkout flow; add analytics.")
 
         titles = [task.title for task in session.tentative_tasks]
@@ -326,12 +350,14 @@ class PlanningWorkflowTests(unittest.TestCase):
         self.assertEqual(session.phase.name, "REVIEW")
 
     def test_rule_engine_caps_task_count_at_five(self) -> None:
+        """Check that the planner does not produce too many tasks at once."""
         session = self.service.create_session("one. two. three. four. five. six. seven.")
 
         self.assertEqual(len(session.tentative_tasks), 5)
         self.assertEqual([task.title for task in session.tentative_tasks], ["One", "Two", "Three", "Four", "Five"])
 
     def test_revision_increments_counter_and_extends_transcript(self) -> None:
+        """Check that a revision is counted and added to the conversation."""
         session = self.service.create_session("Build a portfolio site")
         revised = self.service.revise_session(session, "Split it into layout, copy, and deployment.")
 
@@ -341,6 +367,7 @@ class PlanningWorkflowTests(unittest.TestCase):
         self.assertIn("Assistant revision:", self.service.render_transcript_text(revised))
 
     def test_approval_clones_tentative_tasks_into_structured_output(self) -> None:
+        """Check that approval copies the draft tasks into final output."""
         session = self.service.create_session("Ship a landing page with email capture and analytics")
         approved = self.service.approve_session(session)
 
@@ -350,6 +377,7 @@ class PlanningWorkflowTests(unittest.TestCase):
         self.assertIn("Structured output:", self.service.render_structured_preview_text(approved))
 
     def test_render_transcript_joins_messages_with_spacing(self) -> None:
+        """Check that the transcript is printed in a readable format."""
         session = self.service.create_session("Write docs")
 
         transcript = self.service.render_transcript_text(session)

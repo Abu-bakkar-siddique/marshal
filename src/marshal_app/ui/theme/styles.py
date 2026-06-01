@@ -170,6 +170,36 @@ QPushButton#PrimaryActionButton:hover {
     border-color: #ffffff;
 }
 
+QLabel#PlanningTitle {
+    color: #e8e8e8;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+QLabel#PlanningSubtitle,
+QLabel#PlanningStatus {
+    color: #a0a0a0;
+    font-size: 12px;
+}
+
+QPlainTextEdit#PlanningTranscript {
+    background: transparent;
+    color: #e8e8e8;
+    border: none;
+    padding: 0;
+}
+
+QPlainTextEdit#PlanningInput {
+    background: #252525;
+    color: #e8e8e8;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 8px;
+}
+
+QPlainTextEdit#PlanningInput:focus {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
 QFrame#AddRow {
     background: #1c1c1c;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -380,45 +410,5 @@ QPlainTextEdit {
 QLabel#EmptyStateTitle,
 QLabel#EmptyStateMessage {
     color: #606060;
-}
-
-QFrame#PlanningHeader {
-    background: #1c1c1c;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-QLabel#PlanningTitle {
-    color: #e8e8e8;
-    font-size: 15px;
-    font-weight: 500;
-}
-
-QLabel#PlanningSubtitle,
-QLabel#PlanningStatus,
-QLabel#PlanningQuestion {
-    color: #a0a0a0;
-    font-size: 12px;
-}
-
-QLabel#PlanningQuestion {
-    color: #e8e8e8;
-}
-
-QLabel#PlanningSectionTitle {
-    color: #606060;
-    font-size: 10px;
-    font-weight: 500;
-    text-transform: uppercase;
-}
-
-QPlainTextEdit#PlanningInput,
-QPlainTextEdit#PlanningFeedback,
-QPlainTextEdit#PlanningConversation,
-QPlainTextEdit#PlanningDraft,
-QPlainTextEdit#PlanningStructured {
-    background: #252525;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #e8e8e8;
-    padding: 8px;
 }
 """
