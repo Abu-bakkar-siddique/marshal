@@ -1,6 +1,6 @@
 # marshal
 
-`marshal` is a local-first Linux desktop task manager built with Python, PySide6, and SQLite.
+`marshal` is a minimal project management software tailored for my own needs, built as a local-first Linux desktop task manager with Python, PySide6, and SQLite.
 
 The app is structured around ordered project task queues:
 
